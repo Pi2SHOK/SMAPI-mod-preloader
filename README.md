@@ -21,8 +21,8 @@ A lightweight and fast profile manager for **Stardew Valley** with **SMAPI**. Sw
 ## 🛠️ Installation & Setup
 
 1. **Download:** Install the latest `SMAPImodpreloader.exe` from the [Releases](../../releases) tab (or compile from source).
-2. **Place:** Unzip folder somwere and run `installer.exe`.
-3. **Steam Launch Options (Optional):**
+2. **Place:** Unzip folder somwere and run `installer.exe` as Administrator.
+4. **Steam Launch Options (Optional):**
    If you want Steam to launch this preloader automatically when clicking **Play**:
    * Open **Steam** -> Right-click **Stardew Valley** -> **Properties**.
    * In **Launch Options**, paste the path to `SMAPImodpreloader.exe` from concole
@@ -33,6 +33,15 @@ A lightweight and fast profile manager for **Stardew Valley** with **SMAPI**. Sw
    *Open Steam -> Right-click Stardew Valley -> Properties -> General -> Launch Options.
 3. Enter th path to your SMAPImodpreloader.exe wrapped in quotes, followed by %command%
    *(Exemple: "C:\Program Files (x86)\Steam\steamapps\common\Stardew Valley\SMAPImodpreloader.exe" %command% )
+
+## **Update**
+1. **Auto update:** Download latest version from the [Releases](../../releases) -> Unzip folder somwere and run `installer.exe` as Admin.
+2. **Manual uppdate:** Download latest version of `SMAPImodpreloader.exe` from the [Releases](../../releases) -> unzip exe file to Stradew folder.
+
+## 🛠️ Uninstall & clean
+1. **Auto uninstall:** Open SMAPImodreloader -> Open settings menu -> [6] Uninstall this program
+2. **Manual uninstall:** Open stradew folder -> Delete `SMAPImodpreloader.exe`
+
 ---
 
 ##  How to Use
