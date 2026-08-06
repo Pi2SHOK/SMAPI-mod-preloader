@@ -1,0 +1,16 @@
+Backups/
+dist/
+node_modules/
+*.spec.js
+*spec
+__pycache__
+*.exe
+.vs/
+[Dd]ebug/
+[Rr]elease/
+[Bb]in/
+[Oo]bj/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
