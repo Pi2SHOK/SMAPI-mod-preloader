@@ -1,16 +1,45 @@
-Backups/
-dist/
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.spec
+
+# JavaScript / Node.js
 node_modules/
 *.spec.js
-*spec
-__pycache__
-*.exe
-.vs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# C# / .NET / Visual Studio
 [Dd]ebug/
 [Rr]elease/
 [Bb]in/
 [Oo]bj/
+.vs/
 *.suo
 *.user
 *.userosscache
 *.sln.docstates
+
+# Binary Files and Build Outputs
+Backups/
+dist/
+build/
+*.exe
+*.dll
+*.so
+*.dylib
+
+# IDE and OS Files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Environment and Local Configs
+.env
+.env.local
+
+# Local Documentation
+Comands.md
