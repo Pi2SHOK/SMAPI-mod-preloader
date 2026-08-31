@@ -78,10 +78,15 @@ def restore_active_profile():
 
 def get_profiles():
     profiles = []
+    
     for item in os.listdir("."):
         if os.path.isdir(item) and item.startswith("Mods_") and item != "Mods_Backup":
-            profiles.append(item[5:])
-    return sorted(profiles)
+            creation_time = os.path.getctime(item)
+            profile_name = item[5:]
+            profiles.append((creation_time, profile_name))
+
+    profiles.sort(key=lambda x: x[0])
+    return [name for _, name in profiles]
 
 
 def run_smapi(profile_name):
