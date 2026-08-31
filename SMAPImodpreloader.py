@@ -4,6 +4,8 @@ import sys
 import msvcrt
 import urllib.request
 import json
+import subprocess
+import ctypes
 
 CURRENT_VERSION = "v1.1.1"          
 GITHUB_API_URL = "https://api.github.com/repos/Pi2SHOK/SMAPI-mod-preloader/releases/latest"
@@ -96,8 +98,17 @@ def run_smapi(profile_name):
     
     print(f"\n\033[36mLaunching SMAPI with profile '{profile_name}'...\033[0m")
 
-    os.startfile(SMAPI_EXE)
+    if os.name == 'nt':
+        hwnd = ctypes.windll.kernel32.GetConsoleWindow()
+        if hwnd != 0:
+            ctypes.windll.user32.ShowWindow(hwnd, 0)
+
+    try:
+        subprocess.run([SMAPI_EXE])
+    except Exception:
+        pass
     
+    restore_active_profile()
     sys.exit()
 
 
@@ -113,7 +124,6 @@ def settings_menu():
 
         key = get_key()
 
-        # [1] Создание новой выкладки
         if key == '1':
             print_header()
             profiles = get_profiles()
@@ -138,7 +148,6 @@ def settings_menu():
             
             input("\nPress Enter to continue...")
 
-        # [2] Переименование выкладки
         elif key == '2':
             profiles = get_profiles()
             if not profiles:
@@ -173,7 +182,6 @@ def settings_menu():
                         print("\033[32mProfile renamed successfully!\033[0m")
                     input("\nPress Enter to continue...")
 
-        # [3] Удаление выкладки
         elif key == '3':
             profiles = get_profiles()
             if not profiles:
@@ -207,7 +215,6 @@ def settings_menu():
                         print("\nDeletion cancelled.")
                     input("\nPress Enter to continue...")
 
-        # [6] Удаление программы
         elif key == '6':
             print_header()
             print("\033[31mAre you sure you want to uninstall this program?\033[0m")
@@ -225,7 +232,6 @@ def settings_menu():
                     else:
                         print("\033[33mFolder 'Mods' already exists, Mods_Backup left unchanged.\033[0m\n")
 
-                # Удаление служебного файла .active_profile
                 if os.path.exists(STATE_FILE):
                     os.remove(STATE_FILE)
 
@@ -241,7 +247,6 @@ def settings_menu():
                 os.remove(script_path)
                 sys.exit()
 
-        # [0] Выход из меню настроек
         elif key == '0':
             break
 
