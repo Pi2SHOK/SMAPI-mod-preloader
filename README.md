@@ -2,7 +2,7 @@
 
 A lightweight and fast profile manager for **Stardew Valley** with **SMAPI**. Switch between different mod sets in a single keypress before starting your game!
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![License](https://img.shields.io/badge/license-GPL3.0-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-Windows-lightgrey.svg)
 ![Game](https://img.shields.io/badge/Stardew%20Valley-v1.6+-brightgreen.svg)
 
