@@ -1,3 +1,4 @@
+import msvcrt
 import os
 import atexit
 import pathlib
@@ -24,15 +25,29 @@ GAME_FOLDER_NAME = "Stardew Valley"
 TARGET_FILE_NAME = "SMAPImodpreloader.exe"
 SHOULD_DELETE_FOLDER = False
 TARGET_FOLDER_PATH = None
-FOLDER_TO_REMOVE = [
-    "SMAPI-mod-preloader-main",
-    "SMAPI-mod-preloader",
-]
+FOLDER_TO_REMOVE = "SMAPI-mod-preloader-main"
+
+
+if os.name == 'nt':
+    os.system('')
+
+
+def clear_screen():
+    os.system('cls' if os.name == 'nt' else 'clear')
+
 
 def set_console_title(title: str) -> None:
     if os.name == "nt":
 
         ctypes.windll.kernel32.SetConsoleTitleW(title)
+
+
+def get_key():
+    char = msvcrt.getch()
+    try:
+        return char.decode('utf-8')
+    except UnicodeDecodeError:
+        return ''
 
 
 def is_admin():
@@ -144,7 +159,7 @@ def check_folder_step():
 
         current_folder = exe_path.parent
         current_name_lower = current_folder.name.lower()
-        if current_name_lower in [name.lower() for name in FOLDER_TO_REMOVE]:
+        if current_name_lower == FOLDER_TO_REMOVE.lower():
             SHOULD_DELETE_FOLDER = True
             TARGET_FOLDER_PATH = current_folder
     except Exception:
@@ -177,7 +192,6 @@ atexit.register(delete_folder_on_exit)
 def main() -> None:
     set_console_title("SMAPI Preloader Installer")
 
-    # Заголовок
     time.sleep(0.17)
     print(f"{DARK_BLUE}{'=' * 55}")
     print(f"{BOLD}          SMAPI PRELOADER INSTALLER FOR STARDEW")
@@ -185,10 +199,15 @@ def main() -> None:
 
     if not is_admin():
         print(f"{RED}[ERROR] Please run the installer as administrator!{RESET}\n")
-        input("Press Enter to exit...")
-        sys.exit(1)
+        print("Press any key to exit...")
+        
+        key = get_key()
+        
+        if key == '0':
+            clear_screen()
+        else:
+            sys.exit(1)
 
-    # Определение пути к файлу
     if getattr(sys, "frozen", False):
         current_dir = Path(sys.executable).parent
     else:
@@ -201,9 +220,9 @@ def main() -> None:
         print(f"Checked path: {source_file}")
         print(f"Place the file next to the script/exe and run it again.\n")
         input("Press Enter to exit...")
-        sys.exit(1)
+    sys.exit(1)
 
-    # Пункт [1/4]
+    #[1/4]
     time.sleep(0.17)
     print(CYAN + "=" * 55)
     print(f"{BOLD}{YELLOW}[1/4] Searching for Stardew Valley folder...{RESET}")
@@ -231,7 +250,7 @@ def main() -> None:
     print(f"{GREEN}./ Folder found:{RESET} {game_path}\n")
     time.sleep(0.17)
 
-    # Пункт [2/4]
+    #[2/4]
     time.sleep(0.17)
     print(CYAN + "=" * 55)
     print(f"{BOLD}{YELLOW}[2/4] Installing {TARGET_FILE_NAME} to game folder...{RESET}")
@@ -258,7 +277,7 @@ def main() -> None:
         sys.exit(1)
 
     time.sleep(0.17)
-    # Пункт [3/4]
+    #[3/4]
     print(CYAN + "=" * 55)
     print(f"{BOLD}{YELLOW}[3/4] Removing temporary files after installation:{RESET}")
     print()
@@ -270,7 +289,7 @@ def main() -> None:
     print(f"{GREEN}./ Temporary files removed{RESET}\n")
     time.sleep(0.17)
 
-    # Пункт [4/4]
+    #[4/4]
     print(CYAN + "=" * 55)
     print(f"{BOLD}{YELLOW}[4/4] Configure Launch Options in Steam:{RESET}")
     print(CYAN + "=" * 55 + RESET)
