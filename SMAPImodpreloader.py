@@ -8,17 +8,20 @@ import subprocess
 import ctypes
 import zipfile
 
-CURRENT_VERSION = "v1.2.0"          
+CURRENT_VERSION = "v1.2.0"
+
 GITHUB_API_URL = "https://api.github.com/repos/Pi2SHOK/SMAPI-mod-preloader/releases/latest"
 GITHUB_RELEASE_URL = "https://github.com/Pi2SHOK/SMAPI-mod-preloader/releases/latest"
+
 SMAPI_EXE = "StardewModdingAPI.exe"
-MODS_FOLDER = "Mods"
-STATE_FILE = ".active_profile"
 TARGET_EXE_NAME = "SMAPImodpreloader.exe"
+MODS_FOLDER = "Mods"
 
 NEW_VERSION_AVAILABLE = False
 LATEST_VERSION_STR = ""
 LATEST_DOWNLOAD_URL = ""
+
+STATE_FILE = ".active_profile"
 
 if os.name == 'nt':
     os.system('')
