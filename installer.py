@@ -220,7 +220,7 @@ def main() -> None:
         print(f"Checked path: {source_file}")
         print(f"Place the file next to the script/exe and run it again.\n")
         input("Press Enter to exit...")
-    sys.exit(1)
+        sys.exit(1)
 
     #[1/4]
     time.sleep(0.17)
