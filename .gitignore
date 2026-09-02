@@ -43,7 +43,5 @@ Thumbs.db
 
 # Local Documentation
 Comands.md
-*.ico
 build/installer/EXE-00.toc
-build.py
 Debug_
