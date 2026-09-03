@@ -9,6 +9,7 @@ import winreg
 import random
 import time
 import ctypes
+import re
 from pathlib import Path
 
 os.system("")
@@ -25,7 +26,10 @@ GAME_FOLDER_NAME = "Stardew Valley"
 TARGET_FILE_NAME = "SMAPImodpreloader.exe"
 SHOULD_DELETE_FOLDER = False
 TARGET_FOLDER_PATH = None
-FOLDER_TO_REMOVE = "SMAPI-mod-preloader-main"
+FOLDER_TO_REMOVE = ["SMAPI-mod-preloader-main",
+                    "SMAPI-mod-preloader",
+                    "SMAPI-mod-preloader-unstable"
+]
 
 
 if os.name == 'nt':
@@ -158,13 +162,16 @@ def check_folder_step():
             exe_path = pathlib.Path(__file__).resolve()
 
         current_folder = exe_path.parent
-        current_name_lower = current_folder.name.lower()
-        if current_name_lower == FOLDER_TO_REMOVE.lower():
-            SHOULD_DELETE_FOLDER = True
-            TARGET_FOLDER_PATH = current_folder
+        folder_name = current_folder.name
+
+        for base_name in FOLDER_TO_REMOVE:
+            pattern = rf"^{re.escape(base_name)}(\s*\(\d+\))?$"
+            if re.match(pattern, folder_name, re.IGNORECASE):
+                SHOULD_DELETE_FOLDER = True
+                TARGET_FOLDER_PATH = current_folder
+                break
     except Exception:
         pass
-
 
 def delete_folder_on_exit():
     if SHOULD_DELETE_FOLDER and TARGET_FOLDER_PATH:
@@ -190,7 +197,7 @@ atexit.register(delete_folder_on_exit)
 
 
 def main() -> None:
-    set_console_title("SMAPI Preloader Installer")
+    set_console_title("SMAPI Preloader Installer(unstable)")
 
     time.sleep(0.17)
     print(f"{DARK_BLUE}{'=' * 55}")
