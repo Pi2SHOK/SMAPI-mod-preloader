@@ -10,7 +10,7 @@ RESET = "\033[0m"
 BUILDER_DIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.abspath(os.path.join(BUILDER_DIR, ".."))
 
-RELEASE_NAME = "SMAPI-mod-preloader-main"
+RELEASE_NAME = "SMAPI-mod-preloader-unstable"
 
 ROOT_DIST_DIR = os.path.join(PARENT_DIR, "dist")
 RELEASE_DIR = os.path.join(ROOT_DIST_DIR, RELEASE_NAME)
