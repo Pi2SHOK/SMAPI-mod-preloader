@@ -8,7 +8,7 @@ import subprocess
 import ctypes
 import zipfile
 
-CURRENT_VERSION = "v1.2.0"
+CURRENT_VERSION = "v1.2.1"
 
 GITHUB_API_URL = "https://api.github.com/repos/Pi2SHOK/SMAPI-mod-preloader/releases/latest"
 GITHUB_RELEASE_URL = "https://github.com/Pi2SHOK/SMAPI-mod-preloader/releases/latest"
