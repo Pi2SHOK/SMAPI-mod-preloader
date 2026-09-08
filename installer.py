@@ -16,6 +16,7 @@ os.system("")
 
 GREEN = "\033[92m"
 YELLOW = "\033[93m"
+DARK_YELLOW = "\033[33m"
 CYAN = "\033[96m"
 RED = "\033[91m"
 RESET = "\033[0m"
@@ -307,7 +308,7 @@ def main() -> None:
 
     command_line = f'"{target_path}" %command%'
 
-    print(f"\n{RED}Copy the line below and paste it into Steam launch options:{RESET}")
+    print(f"\n{DARK_YELLOW}Copy the line below and paste it into Steam launch options:{RESET}")
     print(f"\n{BOLD}{GREEN}{command_line}{RESET}\n")
     time.sleep(0.17)
 
