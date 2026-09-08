@@ -8,17 +8,35 @@ RED_TEXT = "\033[91m\033[1m"
 RESET = "\033[0m"
 
 BUILDER_DIR = os.path.dirname(os.path.abspath(__file__))
-ROOT_DIR = os.path.abspath(os.path.join(BUILDER_DIR, ".."))
+PARENT_DIR = os.path.abspath(os.path.join(BUILDER_DIR, ".."))
 
 RELEASE_NAME = "SMAPI-mod-preloader-main"
 
-ROOT_DIST_DIR = os.path.join(ROOT_DIR, "dist")
+ROOT_DIST_DIR = os.path.join(PARENT_DIR, "dist")
 RELEASE_DIR = os.path.join(ROOT_DIST_DIR, RELEASE_NAME)
-ICON_PATH = os.path.join(BUILDER_DIR, "icon.ico")
+
+
+def find_script_path(file_name):
+    local_path = os.path.join(BUILDER_DIR, file_name)
+    if os.path.exists(local_path):
+        return local_path
+
+    parent_path = os.path.join(PARENT_DIR, file_name)
+    if os.path.exists(parent_path):
+        return parent_path
+
+    return None
+
+
+ICON_PATH = find_script_path("icon.ico")
 
 
 def run_pyinstaller(script_name):
-    script_path = os.path.join(ROOT_DIR, script_name)
+    script_path = find_script_path(script_name)
+
+    if not script_path:
+        print(f"{RED_TEXT}[ERROR] File '{script_name}' not found in builder dir or parent dir!{RESET}")
+        sys.exit(1)
 
     cmd = [
         "py",
@@ -31,7 +49,7 @@ def run_pyinstaller(script_name):
         script_path,
     ]
 
-    if os.path.exists(ICON_PATH):
+    if ICON_PATH and os.path.exists(ICON_PATH):
         cmd.append(f"--icon={ICON_PATH}")
 
     subprocess.run(cmd, check=True)
@@ -51,22 +69,29 @@ def build():
 
     os.makedirs(RELEASE_DIR, exist_ok=True)
 
+    readme_path = find_script_path("README.md")
+    license_path = find_script_path("LICENSE")
+
     files_to_copy = [
-        os.path.join(ROOT_DIR, "README.md"),
-        os.path.join(ROOT_DIR, "LICENSE"),
+        readme_path,
+        license_path,
         os.path.join(ROOT_DIST_DIR, "installer.exe"),
         os.path.join(ROOT_DIST_DIR, "SMAPImodpreloader.exe"),
     ]
 
     for file in files_to_copy:
-        try:
-            shutil.copy(file, RELEASE_DIR)
-            print(f"Copied: {os.path.basename(file)}")
-        except FileNotFoundError:
-            print(f"[!] File not found (skipped): {os.path.basename(file)}")
+        if file and os.path.exists(file):
+            try:
+                shutil.copy(file, RELEASE_DIR)
+                print(f"Copied: {os.path.basename(file)}")
+            except Exception as e:
+                print(f"[!] Failed to copy {os.path.basename(file)}: {e}")
+        else:
+            print("[!] File not found (skipped)")
 
     zip_path = os.path.join(ROOT_DIST_DIR, RELEASE_NAME)
     shutil.make_archive(zip_path, "zip", RELEASE_DIR)
+
     build_temp_dir = os.path.join(BUILDER_DIR, "build")
     if os.path.exists(build_temp_dir):
         shutil.rmtree(build_temp_dir)
