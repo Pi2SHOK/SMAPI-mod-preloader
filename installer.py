@@ -212,6 +212,9 @@ def main() -> None:
         
         if key == '0':
             clear_screen()
+            print(f"{DARK_BLUE}{'=' * 55}")
+            print(f"{BOLD}          SMAPI PRELOADER INSTALLER FOR STARDEW")
+            print(f"{'=' * 55}{RESET}\n")
         else:
             sys.exit(1)
 
