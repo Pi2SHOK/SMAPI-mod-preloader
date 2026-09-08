@@ -198,10 +198,10 @@ def update_self():
     print(f"\033[33mStarting update to {LATEST_VERSION_STR}...\033[0m")
     
     current_exe = os.path.abspath(sys.argv[0])
-    temp_download = "update_download.tmp"
-    extract_folder = "update_extracted"
-    temp_new_exe = current_exe + ".new"
-    bat_file = "update_temp.bat"
+    temp_download = os.path.abspath("update_download.tmp")
+    extract_folder = os.path.abspath("update_extracted")
+    temp_new_exe = os.path.abspath(current_exe + ".new")
+    bat_file = os.path.abspath("update_temp.bat")
 
     try:
         download_progress(LATEST_DOWNLOAD_URL, temp_download)
@@ -239,13 +239,17 @@ def update_self():
         print("\033[32mUpdate downloaded successfully!\033[0m")
         input("\nPress Enter to restart Preloader...")
 
-        bat_file = os.path.abspath("update_temp.bat")
-
         bat_content = f"""@echo off
-timeout /t 1 /nobreak > nul
-move /y "{temp_new_exe}" "{current_exe}" > nul
-if exist "{temp_download}" del /f /q "{temp_download}"
-if exist "{extract_folder}" rmdir /s /q "{extract_folder}"
+timeout /t 2 /nobreak > nul
+:retry
+copy /y "{temp_new_exe}" "{current_exe}" > nul
+if errorlevel 1 (
+    timeout /t 1 /nobreak > nul
+    goto retry
+)
+del /f /q "{temp_new_exe}" > nul
+if exist "{temp_download}" del /f /q "{temp_download}" > nul
+if exist "{extract_folder}" rmdir /s /q "{extract_folder}" > nul
 start "" "{current_exe}"
 del "%~f0"
 """
@@ -257,11 +261,8 @@ del "%~f0"
 
     except urllib.error.HTTPError as e:
         print(f"\033[31mFailed to update (Server Error): HTTP {e.code} - {e.reason}\033[0m")
-        if e.code == 404:
-            print("\033[31mReason: The requested file was not found on GitHub. Check file name in release.\033[0m")
     except urllib.error.URLError as e:
         print(f"\033[31mFailed to update (Network Error): {e.reason}\033[0m")
-        print("\033[31mReason: Connection failed. Check your internet connection or firewall.\033[0m")
     except zipfile.BadZipFile:
         print("\033[31mFailed to update: Downloaded file is corrupted or not a valid ZIP archive.\033[0m")
     except Exception as e:
@@ -272,12 +273,6 @@ del "%~f0"
             except Exception: pass
         if os.path.exists(extract_folder):
             try: shutil.rmtree(extract_folder, ignore_errors=True)
-            except Exception: pass
-        if os.path.exists(temp_new_exe):
-            try: os.remove(temp_new_exe)
-            except Exception: pass
-        if os.path.exists(bat_file):
-            try: os.remove(bat_file)
             except Exception: pass
 
     input("\nPress Enter to return to menu...")
@@ -426,8 +421,13 @@ def settings_menu():
                 exe_path = os.path.abspath(sys.argv[0])
                 bat_file = os.path.abspath("uninstall_temp.bat")
                 bat_content = f"""@echo off
-timeout /t 1 /nobreak > nul
-del /f /q "{exe_path}"
+timeout /t 2 /nobreak > nul
+:retry
+del /f /q "{exe_path}" > nul
+if exist "{exe_path}" (
+    timeout /t 1 /nobreak > nul
+    goto retry
+)
 del "%~f0"
 """
                 with open(bat_file, "w", encoding="utf-8") as f:
