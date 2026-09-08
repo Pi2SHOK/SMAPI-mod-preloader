@@ -239,6 +239,8 @@ def update_self():
         print("\033[32mUpdate downloaded successfully!\033[0m")
         input("\nPress Enter to restart Preloader...")
 
+        bat_file = os.path.abspath("update_temp.bat")
+
         bat_content = f"""@echo off
 timeout /t 1 /nobreak > nul
 move /y "{temp_new_exe}" "{current_exe}" > nul
@@ -250,7 +252,7 @@ del "%~f0"
         with open(bat_file, "w", encoding="utf-8") as f:
             f.write(bat_content)
 
-        subprocess.Popen([bat_file], shell=True)
+        os.startfile(bat_file)
         sys.exit()
 
     except urllib.error.HTTPError as e:
@@ -422,7 +424,7 @@ def settings_menu():
                 input("Press Enter to close and remove the program...")
                 
                 exe_path = os.path.abspath(sys.argv[0])
-                bat_file = "uninstall_temp.bat"
+                bat_file = os.path.abspath("uninstall_temp.bat")
                 bat_content = f"""@echo off
 timeout /t 1 /nobreak > nul
 del /f /q "{exe_path}"
@@ -430,7 +432,8 @@ del "%~f0"
 """
                 with open(bat_file, "w", encoding="utf-8") as f:
                     f.write(bat_content)
-                subprocess.Popen([bat_file], shell=True)
+
+                os.startfile(bat_file)
                 sys.exit()
 
         elif key == '0':
