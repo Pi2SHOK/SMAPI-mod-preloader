@@ -22,25 +22,18 @@ A lightweight and fast profile manager for **Stardew Valley** with **SMAPI**. Sw
 
 1. **Download:** Install the latest `SMAPImodpreloader.exe` from the [Releases](../../releases) tab (or compile from source).
 2. **Place:** Unzip folder somwere and run `installer.exe` as Administrator.
+3. **Auto-delete:** auto deletes temporary files and folder with installer
 4. **Steam Launch Options (Optional):**
    If you want Steam to launch this preloader automatically when clicking **Play**:
    * Open **Steam** -> Right-click **Stardew Valley** -> **Properties**.
    * In **Launch Options**, paste the path to `SMAPImodpreloader.exe` from concole
   
 ## 🛠️ Option 2: Manual Installation
-1. **Download:** Download SMAPImodpreloader.exe and place it into your main Stardew Valley game folder.
+1. **Download:** Download `SMAPImodpreloader.exe` from the [Releases](../../releases) and place it into your main Stardew Valley game folder.
 2. **Configure Steam Launch Options Manually:**
    *Open Steam -> Right-click Stardew Valley -> Properties -> General -> Launch Options.
 3. Enter th path to your SMAPImodpreloader.exe wrapped in quotes, followed by %command%
    *(Exemple: "C:\Program Files (x86)\Steam\steamapps\common\Stardew Valley\SMAPImodpreloader.exe" %command% )
-
-## **Update**
-1. **Auto update:** Download latest version from the [Releases](../../releases) -> Unzip folder somwere and run `installer.exe` as Admin.
-2. **Manual uppdate:** Download latest version of `SMAPImodpreloader.exe` from the [Releases](../../releases) -> unzip exe file to Stradew folder.
-
-## 🛠️ Uninstall & clean
-1. **Auto uninstall:** Open SMAPImodreloader -> Open settings menu -> [6] Uninstall this program
-2. **Manual uninstall:** Open stradew folder -> Delete `SMAPImodpreloader.exe`
 
 ---
 
@@ -63,10 +56,34 @@ A lightweight and fast profile manager for **Stardew Valley** with **SMAPI**. Sw
 
 ---
 
+## Update
+1. **Auto update:** Open `SMAPImodpreloader.exe` -> Open settings menu -> `[4]` Update program to latest version.
+2. **Auto update2:** Download latest version from the [Releases](../../releases) -> Unzip folder somwere and run `installer.exe` as Admin.
+3. **Manual uppdate:** Download latest version of `SMAPImodpreloader.exe` from the [Releases](../../releases) -> unzip exe file to Stradew folder.
+
+## 🛠️ Uninstall & clean
+1. **Auto uninstall:** Open `SMAPImodreloader` -> Open settings menu -> [6] Uninstall this program
+2. **Manual uninstall:** Open stradew folder -> Delete `SMAPImodpreloader.exe`
+
+---
+
+## Build from py-script/command
+1. **Pyinstaller:** 
+   >Makse sure you have Pyinstaller, if not install it whith `pip install -U pyinstaller` command.
+   >Than you need to download latest sourse code from the [Releases](../../releases) and open it whith code editor which u have.'
+   >Run `py exe_builder/build.py` and build programm will do all automatically.
+   >Open `dist` folder and exe files will be dere.
+2. **Commands:**
+   >if you didnt trust `builder.py` you can run: 
+   >`py -m PyInstaller --onefile --icon="exe_builder/icon.ico" installer.py ; py -m PyInstaller --onefile --icon="exe_builder/icon.ico" SMAPImodpreloader.py`  
+   
+
+---
+
 ## ⚠️ Antivirus / Windows Defender Note
 
 > **Note regarding False Positives:**
 > Because this executable is packaged using PyInstaller without an expensive commercial code-signing certificate, **Windows Defender or SmartScreen may show a warning** (*"Unknown Publisher"* / *False Positive*).
 > 
 > * **To run:** Click **"More info"** -> **"Run anyway"**.
-> * **Alternative:** You can review the open-source Python script (`SMAPImodpreloader.py`) and compile it yourself using PyInstaller!
+> * **Alternative:** You can review the open-source Python script `SMAPImodpreloader.py` and compile it yourself using PyInstaller
