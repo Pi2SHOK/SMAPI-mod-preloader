@@ -14,14 +14,15 @@ from pathlib import Path
 
 os.system("")
 
-GREEN = "\033[92m"
-YELLOW = "\033[93m"
-DARK_YELLOW = "\033[33m"
-CYAN = "\033[96m"
-RED = "\033[91m"
-RESET = "\033[0m"
-BOLD = "\033[1m"
-DARK_BLUE = "\033[34m"
+class Color:
+    GREEN = "\033[92m"
+    YELLOW = "\033[93m"
+    DARK_YELLOW = "\033[33m"
+    CYAN = "\033[96m"
+    RED = "\033[91m"
+    RESET = "\033[0m"
+    BOLD = "\033[1m"
+    DARK_BLUE = "\033[34m"
 
 GAME_FOLDER_NAME = "Stardew Valley"
 TARGET_FILE_NAME = "SMAPImodpreloader.exe"
@@ -100,11 +101,11 @@ def find_steam_game_path(folder_name: str) -> Path | None:
 
 
 def render_progress_bar(percent: int, filled_length: int, bar_length: 30, is_error: bool = False) -> None:
-    color = RED if is_error else GREEN
-    filled_bar = f"{color}{'█' * filled_length}{RESET}"
+    color = Color.RED if is_error else Color.GREEN
+    filled_bar = f"{color}{'█' * filled_length}{Color.RESET}"
     empty_bar = "░" * (bar_length - filled_length)
-    
-    error_tag = f" {RED}[ERROR]{RESET}" if is_error else ""
+
+    error_tag = f" {Color.RED}[ERROR]{Color.RESET}" if is_error else ""
     sys.stdout.write(f"\033[2A\r[{filled_bar}{empty_bar}] {percent}%{error_tag}\n\n")
     sys.stdout.flush()
 
@@ -201,21 +202,21 @@ def main() -> None:
     set_console_title("SMAPI Preloader Installer(unstable)")
 
     time.sleep(0.17)
-    print(f"{DARK_BLUE}{'=' * 55}")
-    print(f"{BOLD}          SMAPI PRELOADER INSTALLER FOR STARDEW")
-    print(f"{'=' * 55}{RESET}\n")
+    print(f"{Color.DARK_BLUE}{'=' * 55}")
+    print(f"{Color.BOLD}          SMAPI PRELOADER INSTALLER FOR STARDEW")
+    print(f"{'=' * 55}{Color.RESET}\n")
 
     if not is_admin():
-        print(f"{RED}[ERROR] Please run the installer as administrator!{RESET}\n")
+        print(f"{Color.RED}[ERROR] Please run the installer as administrator!{Color.RESET}\n")
         print("Press any key to exit...")
         
         key = get_key()
         
         if key == '0':
             clear_screen()
-            print(f"{DARK_BLUE}{'=' * 55}")
-            print(f"{BOLD}          SMAPI PRELOADER INSTALLER FOR STARDEW")
-            print(f"{'=' * 55}{RESET}\n")
+            print(f"{Color.DARK_BLUE}{'=' * 55}")
+            print(f"{Color.BOLD}          SMAPI PRELOADER INSTALLER FOR STARDEW")
+            print(f"{'=' * 55}{Color.RESET}\n")
         else:
             sys.exit(1)
 
@@ -227,7 +228,7 @@ def main() -> None:
     source_file = current_dir / TARGET_FILE_NAME
 
     if not source_file.exists():
-        print(f"{RED}[ERROR] File '{TARGET_FILE_NAME}' not found in current folder!{RESET}")
+        print(f"{Color.RED}[ERROR] File '{TARGET_FILE_NAME}' not found in current folder!{Color.RESET}")
         print(f"Checked path: {source_file}")
         print(f"Place the file next to the script/exe and run it again.\n")
         input("Press Enter to exit...")
@@ -235,85 +236,85 @@ def main() -> None:
 
     #[1/4]
     time.sleep(0.17)
-    print(CYAN + "=" * 55)
-    print(f"{BOLD}{YELLOW}[1/4] Searching for Stardew Valley folder...{RESET}")
+    print(Color.CYAN + "=" * 55)
+    print(f"{Color.BOLD}{Color.YELLOW}[1/4] Searching for Stardew Valley folder...{Color.RESET}")
     print()
-    print(CYAN + "=" * 55 + RESET)
+    print(Color.CYAN + "=" * 55 + Color.RESET)
 
     game_path = find_steam_game_path(GAME_FOLDER_NAME)
 
     if not game_path:
         fake_installer_error()
         time.sleep(0.17)
-        print(f"{RED}X Could not automatically find Stardew Valley.{RESET}")
-        custom_path_str = input(f"{CYAN}Enter the path to the game folder manually: {RESET}").strip('"')
+        print(f"{Color.RED}X Could not automatically find Stardew Valley.{Color.RESET}")
+        custom_path_str = input(f"{Color.CYAN}Enter the path to the game folder manually: {Color.RESET}").strip('"')
         game_path = Path(custom_path_str)
 
         if not game_path.exists():
             fake_installer_error()
             time.sleep(0.17)
-            print(f"{RED}X Specified path does not exist! Aborting.{RESET}\n")
+            print(f"{Color.RED}X Specified path does not exist! Aborting.{Color.RESET}\n")
             input("Press Enter to exit...")
             sys.exit(1)
 
     fake_installer()
     time.sleep(0.17)
-    print(f"{GREEN}./ Folder found:{RESET} {game_path}\n")
+    print(f"{Color.GREEN}./ Folder found:{Color.RESET} {game_path}\n")
     time.sleep(0.17)
 
     #[2/4]
     time.sleep(0.17)
-    print(CYAN + "=" * 55)
-    print(f"{BOLD}{YELLOW}[2/4] Installing {TARGET_FILE_NAME} to game folder...{RESET}")
+    print(Color.CYAN + "=" * 55)
+    print(f"{Color.BOLD}{Color.YELLOW}[2/4] Installing {TARGET_FILE_NAME} to game folder...{Color.RESET}")
     print()
-    print(CYAN + "=" * 55 + RESET)
+    print(Color.CYAN + "=" * 55 + Color.RESET)
 
     target_path = game_path / TARGET_FILE_NAME
     try:
         shutil.copy2(source_file, target_path)
         fake_installer()
         time.sleep(0.17)
-        print(f"{GREEN}./ File successfully copied to the game folder!{RESET}\n")
+        print(f"{Color.GREEN}./ File successfully copied to the game folder!{Color.RESET}\n")
     except PermissionError:
         fake_installer_error()
         time.sleep(0.17)
-        print(f"{RED}X Access denied. Please run the program as administrator.{RESET}\n")
+        print(f"{Color.RED}X Access denied. Please run the program as administrator.{Color.RESET}\n")
         input("Press Enter to exit...")
         sys.exit(1)
     except Exception as e:
         fake_installer_error()
         time.sleep(0.17)
-        print(f"{RED}X Error copying file: {e}{RESET}\n")
+        print(f"{Color.RED}X Error copying file: {e}{Color.RESET}\n")
         input("Press Enter to exit...")
         sys.exit(1)
 
     time.sleep(0.17)
     #[3/4]
-    print(CYAN + "=" * 55)
-    print(f"{BOLD}{YELLOW}[3/4] Removing temporary files after installation:{RESET}")
+    print(Color.CYAN + "=" * 55)
+    print(f"{Color.BOLD}{Color.YELLOW}[3/4] Removing temporary files after installation:{Color.RESET}")
     print()
-    print(CYAN + "=" * 55 + RESET)
+    print(Color.CYAN + "=" * 55 + Color.RESET)
 
     check_folder_step()
     fake_installer()
     time.sleep(0.17)
-    print(f"{GREEN}./ Temporary files removed{RESET}\n")
+    print(f"{Color.GREEN}./ Temporary files removed{Color.RESET}\n")
     time.sleep(0.17)
 
     #[4/4]
-    print(CYAN + "=" * 55)
-    print(f"{BOLD}{YELLOW}[4/4] Configure Launch Options in Steam:{RESET}")
-    print(CYAN + "=" * 55 + RESET)
+    print(Color.CYAN + "=" * 55)
+    print(f"{Color.BOLD}{Color.YELLOW}[4/4] Configure Launch Options in Steam:{Color.RESET}")
+    print(Color.CYAN + "=" * 55 + Color.RESET)
     time.sleep(0.17)
 
     command_line = f'"{target_path}" %command%'
 
-    print(f"\n{DARK_YELLOW}Copy the line below and paste it into Steam launch options:{RESET}")
-    print(f"\n{BOLD}{GREEN}{command_line}{RESET}\n")
+    print(f"\n{Color.DARK_YELLOW}Copy the line below and paste it into Steam launch options:{Color.RESET}")
+    print(f"\n{Color.BOLD}{Color.GREEN}{command_line}{Color.RESET}\n")
     time.sleep(0.17)
 
-    print(CYAN + "=" * 55 + RESET)
-    input(f"\n{BOLD}Installation complete! Press Enter to close...{RESET}\n")
+    print(Color.CYAN + "=" * 55 + Color.RESET)
+    input(f"\n{Color.BOLD}Installation complete! Press Enter to close...{Color.RESET}\n")
 
 
 if __name__ == "__main__":
