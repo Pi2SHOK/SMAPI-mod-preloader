@@ -5,21 +5,16 @@ import msvcrt
 import urllib.request
 import json
 import subprocess
-import ctypes
 import zipfile
+import urllib.error
 
-CURRENT_VERSION = "v1.2.1"
+CURRENT_VERSION = "v1.2.2"
 
 GITHUB_API_URL = "https://api.github.com/repos/Pi2SHOK/SMAPI-mod-preloader/releases/latest"
-GITHUB_RELEASE_URL = "https://github.com/Pi2SHOK/SMAPI-mod-preloader/releases/latest"
 
 SMAPI_EXE = "StardewModdingAPI.exe"
 TARGET_EXE_NAME = "SMAPImodpreloader.exe"
 MODS_FOLDER = "Mods"
-
-NEW_VERSION_AVAILABLE = False
-LATEST_VERSION_STR = ""
-LATEST_DOWNLOAD_URL = ""
 
 STATE_FILE = ".active_profile"
 
@@ -41,8 +36,19 @@ def clear_screen():
 
 
 def parse_version(v_str):
-    clean_str = v_str.lstrip('v').strip()
-    return tuple(map(int, clean_str.split('.')))
+    if not isinstance(v_str, str):
+        raise ValueError("Version must be a string")
+
+    clean_str = v_str.strip()
+    if clean_str.lower().startswith("v"):
+        clean_str = clean_str[1:]
+
+    parts = clean_str.split(".")
+
+    if len(parts) != 3 or any(not part.isdigit() for part in parts):
+        raise ValueError(f"Invalid version format: {v_str}")
+
+    return tuple(map(int, parts))
 
 
 def print_header():
@@ -78,10 +84,16 @@ def restore_active_profile():
 
 def get_profiles():
     profiles = []
+
     for item in os.listdir("."):
-        if os.path.isdir(item) and item.startswith("Mods_") and item != "Mods_Backup":
+        if (
+            os.path.isdir(item)
+            and item.startswith("Mods_")
+            and item != "Mods_Backup"
+            and len(item) > len("Mods_")
+        ):
             creation_time = os.path.getctime(item)
-            profile_name = item[5:]
+            profile_name = item[len("Mods_"):]
             profiles.append((creation_time, profile_name))
 
     profiles.sort(key=lambda x: x[0])
@@ -90,76 +102,65 @@ def get_profiles():
 
 def run_smapi(profile_name):
     profile_folder = f"Mods_{profile_name}"
-    
-    if os.path.exists(MODS_FOLDER) and not os.path.islink(MODS_FOLDER):
-        if not os.path.exists("Mods_Backup"):
-            os.rename(MODS_FOLDER, "Mods_Backup")
+    smapi_path = os.path.abspath(SMAPI_EXE)
 
-    if os.path.exists(profile_folder):
-        os.rename(profile_folder, MODS_FOLDER)
-        with open(STATE_FILE, "w", encoding="utf-8") as f:
-            f.write(profile_name)
-    
+    if not os.path.isfile(smapi_path):
+        print(f"{Color.RED}SMAPI не найден: {smapi_path}{Color.RESET}")
+        input("\nPress Enter to continue...")
+        return
+
+    if not os.path.isdir(profile_folder):
+        print(f"{Color.RED}Profile not found: {profile_name}{Color.RESET}")
+        input("\nPress Enter to continue...")
+        return
+
+    if os.path.exists(MODS_FOLDER) and not os.path.islink(MODS_FOLDER):
+        if os.path.exists("Mods_Backup"):
+            print(f"{Color.RED}Mods_Backup already exists.{Color.RESET}")
+            input("\nPress Enter to continue...")
+            return
+        os.rename(MODS_FOLDER, "Mods_Backup")
+
+    os.rename(profile_folder, MODS_FOLDER)
+
+    with open(STATE_FILE, "w", encoding="utf-8") as f:
+        f.write(profile_name)
+
     print(f"\n{Color.CYAN}Launching SMAPI with profile '{profile_name}'...{Color.RESET}")
 
-    if os.name == 'nt':
-        hwnd = ctypes.windll.kernel32.GetConsoleWindow()
-        if hwnd != 0:
-            ctypes.windll.user32.ShowWindow(hwnd, 0)
-
     try:
-        subprocess.run([SMAPI_EXE])
-    except Exception:
-        pass
-    
-    restore_active_profile()
+        subprocess.run([smapi_path], cwd=os.path.dirname(smapi_path), check=False)
+    except OSError as error:
+        print(f"{Color.RED}Failed to launch SMAPI: {error}{Color.RESET}")
+    finally:
+        restore_active_profile()
+
     sys.exit()
 
 
 def check_for_updates():
-    global NEW_VERSION_AVAILABLE, LATEST_VERSION_STR, LATEST_DOWNLOAD_URL
-    
     try:
         req = urllib.request.Request(
-            GITHUB_API_URL, 
-            headers={'User-Agent': 'SMAPI-Mod-Preloader-App'}
+            GITHUB_API_URL,
+            headers={"User-Agent": "SMAPI-Mod-Preloader-App"},
         )
+
         with urllib.request.urlopen(req, timeout=3.0) as response:
             data = json.loads(response.read().decode())
-            latest_version_str = data.get("tag_name", "").strip()
-            
-            if latest_version_str:
-                latest_ver = parse_version(latest_version_str)
-                current_ver = parse_version(CURRENT_VERSION)
-                
-                if latest_ver > current_ver:
-                    NEW_VERSION_AVAILABLE = True
-                    LATEST_VERSION_STR = latest_version_str
-                    LATEST_DOWNLOAD_URL = f"https://github.com/Pi2SHOK/SMAPI-mod-preloader/releases/download/{latest_version_str}/SMAPI-mod-preloader-main.zip"
-                    return
+            latest = data.get("tag_name", "").strip()
+
+        if latest and parse_version(latest) > parse_version(CURRENT_VERSION):
+            download_url = (
+                "https://github.com/Pi2SHOK/SMAPI-mod-preloader/"
+                f"releases/download/{latest}/"
+                "SMAPI-mod-preloader-main.zip"
+            )
+            return True, latest, download_url
 
     except Exception:
         pass
 
-    try:
-        req = urllib.request.Request(
-            GITHUB_RELEASE_URL, 
-            headers={'User-Agent': 'Mozilla/5.0'}
-        )
-        with urllib.request.urlopen(req, timeout=3.0) as response:
-            final_url = response.geturl()
-            latest_version_str = final_url.split('/')[-1].strip()
-            
-            if latest_version_str and latest_version_str != "latest":
-                latest_ver = parse_version(latest_version_str)
-                current_ver = parse_version(CURRENT_VERSION)
-                
-                if latest_ver > current_ver:
-                    NEW_VERSION_AVAILABLE = True
-                    LATEST_VERSION_STR = latest_version_str
-                    LATEST_DOWNLOAD_URL = f"https://github.com/Pi2SHOK/SMAPI-mod-preloader/releases/download/{latest_version_str}/SMAPI-mod-preloader-main.zip"
-    except Exception:
-        pass
+    return False, "", ""
 
 
 def download_progress(url, dest_path):
@@ -195,16 +196,15 @@ def download_progress(url, dest_path):
         print()
 
 
-def update_self():
+def update_self(latest_version_str, latest_download_url):
     print_header()
-    
-    if not LATEST_DOWNLOAD_URL:
+
+    if not latest_download_url:
         print(f"{Color.RED}Error: Release archive not found on GitHub!{Color.RESET}")
-        print(f"{Color.RED}Try to download it manually from the GitHub releases page.{Color.RESET}")
         input("\nPress Enter to return...")
         return
 
-    print(f"{Color.YELLOW}Starting update to {LATEST_VERSION_STR}...{Color.RESET}")
+    print(f"{Color.YELLOW}Starting update to {latest_version_str}...{Color.RESET}")
 
     current_exe = os.path.abspath(sys.argv[0])
     temp_download = os.path.abspath("update_download.tmp")
@@ -212,13 +212,25 @@ def update_self():
     temp_new_exe = os.path.abspath(current_exe + ".new")
     bat_file = os.path.abspath("update_temp.bat")
 
+    update_scheduled = False
+
     try:
-        download_progress(LATEST_DOWNLOAD_URL, temp_download)
+        download_progress(latest_download_url, temp_download)
+
         print(f"{Color.YELLOW}Extracting archive...{Color.RESET}")
 
-        if zipfile.is_zipfile(temp_download):
-            with zipfile.ZipFile(temp_download, 'r') as zip_ref:
-                zip_ref.extractall(extract_folder)
+        with zipfile.ZipFile(temp_download, "r") as zip_ref:
+            base_path = os.path.abspath(extract_folder)
+
+            for member in zip_ref.infolist():
+                target_path = os.path.abspath(
+                    os.path.join(extract_folder, member.filename)
+                )
+
+                if not target_path.startswith(base_path + os.sep):
+                    raise ValueError("Unsafe path in ZIP archive")
+
+            zip_ref.extractall(extract_folder)
             
             extracted_exe = None
             for root, dirs, files in os.walk(extract_folder):
@@ -242,8 +254,7 @@ def update_self():
                 raise Exception(f"Executable file '{TARGET_EXE_NAME}' not found inside downloaded ZIP archive!")
             
             shutil.copy(extracted_exe, temp_new_exe)
-        else:
-            shutil.copy(temp_download, temp_new_exe)
+        
 
         print(f"{Color.GREEN}Update downloaded successfully!{Color.RESET}")
         input("\nPress Enter to restart Preloader...")
@@ -265,6 +276,7 @@ del "%~f0"
         with open(bat_file, "w", encoding="utf-8") as f:
             f.write(bat_content)
 
+        update_scheduled = True
         os.startfile(bat_file)
         sys.exit()
 
@@ -277,17 +289,21 @@ del "%~f0"
     except Exception as e:
         print(f"{Color.RED}Failed to update: {e}{Color.RESET}")
     finally:
-        if os.path.exists(temp_download):
-            try: os.remove(temp_download)
-            except Exception: pass
-        if os.path.exists(extract_folder):
-            try: shutil.rmtree(extract_folder, ignore_errors=True)
-            except Exception: pass
+        if not update_scheduled:
+            for path in (temp_download, temp_new_exe, bat_file):
+                if os.path.exists(path):
+                    try:
+                        os.remove(path)
+                    except OSError:
+                        pass
+
+            if os.path.exists(extract_folder):
+                shutil.rmtree(extract_folder, ignore_errors=True)
 
     input("\nPress Enter to return to menu...")
 
 
-def settings_menu():
+def settings_menu(update_available, latest_version_str, latest_download_url):
     while True:
         print_header()
         print(f"{Color.DARK_BLUE}Current version: {CURRENT_VERSION}{Color.RESET}")
@@ -296,36 +312,52 @@ def settings_menu():
         print("[1] Create a new profile")
         print("[2] Rename a profile")
         print("[3] Delete a profile")
-        
-        if NEW_VERSION_AVAILABLE:
-            print(f"{Color.YELLOW}[4] Update program to {LATEST_VERSION_STR}{Color.RESET}")
+
+        if update_available:
+            print(f"{Color.YELLOW}[4] Update program to {latest_version_str}{Color.RESET}")
 
         print("[6] Uninstall this program")
         print("[0] Back to main menu\n")
 
         key = get_key()
 
-        if key == '1':
+        if key == "1":
             print_header()
             profiles = get_profiles()
-            
+
             if len(profiles) >= 9:
-                print(f"{Color.RED}Cannot create new profile! Limit reached (maximum 9 profiles).{Color.RESET}")
+                print(
+                    f"{Color.RED}"
+                    "Cannot create new profile! Limit reached."
+                    f"{Color.RESET}"
+                )
             else:
                 print("Enter new profile name (or '0' to cancel):")
                 name = input("> ").strip()
-                
-                if name == '0' or not name:
+
+                invalid_chars = r'\/:*?"<>|'
+
+                if name == "0" or not name:
                     print(f"{Color.YELLOW}Creation cancelled.{Color.RESET}")
-                elif name.lower() == "backup":
-                    print(f"{Color.RED}Name 'Backup' is reserved by the system!{Color.RESET}")
+                elif (
+                    name.lower() == "backup"
+                    or name in {".", ".."}
+                    or any(char in name for char in invalid_chars)
+                ):
+                    print(f"{Color.RED}Invalid profile name!{Color.RESET}")
+                elif os.path.exists(f"Mods_{name}"):
+                    print(
+                        f"{Color.RED}"
+                        "A profile with this name already exists!"
+                        f"{Color.RESET}"
+                    )
                 else:
-                    folder_name = f"Mods_{name}"
-                    if not os.path.exists(folder_name):
-                        os.makedirs(folder_name)
-                        print(f"{Color.GREEN}Profile '{name}' successfully created!{Color.RESET}")
-                    else:
-                        print(f"{Color.RED}A profile with this name already exists!{Color.RESET}")
+                    os.makedirs(f"Mods_{name}")
+                    print(
+                        f"{Color.GREEN}"
+                        f"Profile '{name}' created successfully!"
+                        f"{Color.RESET}"
+                    )
 
             input("\nPress Enter to continue...")
 
@@ -356,11 +388,28 @@ def settings_menu():
                     
                     if new_name == '0' or not new_name:
                         print(f"{Color.YELLOW}Renaming cancelled.{Color.RESET}")
-                    elif new_name.lower() == "backup":
-                        print(f"{Color.RED}Name 'Backup' is reserved by the system!{Color.RESET}")
+                    elif (
+                        new_name.lower() == "backup"
+                        or any(char in new_name for char in r'\/:*?"<>|')
+                        or new_name in {".", ".."}
+                    ):
+                        print(f"{Color.RED}Invalid profile name!{Color.RESET}")
+                    elif os.path.exists(f"Mods_{new_name}"):
+                        print(
+                            f"{Color.RED}"
+                            "A profile with this name already exists!"
+                            f"{Color.RESET}"
+                        )
                     else:
-                        os.rename(f"Mods_{old_name}", f"Mods_{new_name}")
-                        print(f"{Color.GREEN}Profile renamed successfully!{Color.RESET}")
+                        os.rename(
+                            f"Mods_{old_name}",
+                            f"Mods_{new_name}",
+                        )
+                        print(
+                            f"{Color.GREEN}"
+                            "Profile renamed successfully!"
+                            f"{Color.RESET}"
+                        )
                     input("\nPress Enter to continue...")
 
         elif key == '3':
@@ -396,8 +445,9 @@ def settings_menu():
                         print(f"{Color.YELLOW}\nDeletion cancelled.{Color.RESET}")
                     input("\nPress Enter to continue...")
 
-        elif key == '4' and NEW_VERSION_AVAILABLE:
-            update_self()
+        elif key == "4" and update_available:
+            update_self(latest_version_str, latest_download_url)
+
 
         elif key == '6':
             print_header()
@@ -450,19 +500,28 @@ del "%~f0"
 
 
 def main():
-    if os.name == 'nt':
-        os.system('title SMAPI Mod Preloader')
+    if os.name == "nt":
+        os.system("title SMAPI Mod Preloader")
 
     restore_active_profile()
-    check_for_updates()
+
+    update_available, latest_version_str, latest_download_url = (
+        check_for_updates()
+    )
 
     while True:
         print_header()
-        
-        if NEW_VERSION_AVAILABLE:
-            print(f"{Color.YELLOW}[!] New update available: {LATEST_VERSION_STR} (Current: {CURRENT_VERSION}){Color.RESET}")
-            print(f"{Color.YELLOW}    Go to the [0] Settings menu and press [4] Update{Color.RESET}")
-            print(f"{Color.YELLOW}    or download at: {GITHUB_RELEASE_URL}{Color.RESET}\n")
+
+        if update_available:
+            print(
+                f"{Color.YELLOW}[!] New update available: "
+                f"{latest_version_str} (Current: {CURRENT_VERSION})"
+                f"{Color.RESET}"
+            )
+            print(
+                f"{Color.YELLOW}    Go to the [0] Settings menu "
+                f"and press [4] Update{Color.RESET}\n"
+            )
 
         profiles = get_profiles()
 
@@ -478,8 +537,12 @@ def main():
 
         key = get_key()
 
-        if key == '0':
-            settings_menu()
+        if key == "0":
+            settings_menu(
+                update_available,
+                latest_version_str,
+                latest_download_url,
+            )
         elif key.isdigit():
             idx = int(key) - 1
             if 0 <= idx < len(profiles):
