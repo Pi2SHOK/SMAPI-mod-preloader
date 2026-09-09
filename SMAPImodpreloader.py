@@ -23,6 +23,14 @@ LATEST_DOWNLOAD_URL = ""
 
 STATE_FILE = ".active_profile"
 
+class Color:
+    RESET = "\033[0m"
+    GREEN = "\033[32m"
+    YELLOW = "\033[33m"
+    CYAN = "\033[36m"
+    RED = "\033[31m"
+    BLUE = "\033[34m"
+
 if os.name == 'nt':
     os.system('')
 
@@ -38,9 +46,9 @@ def parse_version(v_str):
 
 def print_header():
     clear_screen()
-    print("\033[32m=====================")
+    print(f"{Color.GREEN}=====================")
     print(" SMAPI Mod Preloader ")
-    print("=====================\033[0m\n")
+    print(f"====================={Color.RESET}\n")
 
 
 def get_key():
@@ -91,7 +99,7 @@ def run_smapi(profile_name):
         with open(STATE_FILE, "w", encoding="utf-8") as f:
             f.write(profile_name)
     
-    print(f"\n\033[36mLaunching SMAPI with profile '{profile_name}'...\033[0m")
+    print(f"\n{Color.CYAN}Launching SMAPI with profile '{profile_name}'...{Color.RESET}")
 
     if os.name == 'nt':
         hwnd = ctypes.windll.kernel32.GetConsoleWindow()
@@ -178,10 +186,10 @@ def download_progress(url, dest_path):
                     bar = '█' * filled + '░' * (bar_length - filled)
                     mb_downloaded = downloaded / (1024 * 1024)
                     mb_total = total_size / (1024 * 1024)
-                    sys.stdout.write(f"\r\033[33mDownloading: [{bar}] {percent:.1f}% ({mb_downloaded:.2f}/{mb_total:.2f} MB)\033[0m")
+                    sys.stdout.write(f"\r{Color.YELLOW}Downloading: [{bar}] {percent:.1f}% ({mb_downloaded:.2f}/{mb_total:.2f} MB){Color.RESET}")
                 else:
                     mb_downloaded = downloaded / (1024 * 1024)
-                    sys.stdout.write(f"\r\033[33mDownloading: {mb_downloaded:.2f} MB\033[0m")
+                    sys.stdout.write(f"\r{Color.YELLOW}Downloading: {mb_downloaded:.2f} MB{Color.RESET}")
                 sys.stdout.flush()
         print()
 
@@ -190,13 +198,13 @@ def update_self():
     print_header()
     
     if not LATEST_DOWNLOAD_URL:
-        print("\033[31mError: Release archive not found on GitHub!\033[0m")
-        print("\033[31mTry to download it manually from the GitHub releases page.\033[0m")
+        print(f"{Color.RED}Error: Release archive not found on GitHub!{Color.RESET}")
+        print(f"{Color.RED}Try to download it manually from the GitHub releases page.{Color.RESET}")
         input("\nPress Enter to return...")
         return
 
-    print(f"\033[33mStarting update to {LATEST_VERSION_STR}...\033[0m")
-    
+    print(f"{Color.YELLOW}Starting update to {LATEST_VERSION_STR}...{Color.RESET}")
+
     current_exe = os.path.abspath(sys.argv[0])
     temp_download = os.path.abspath("update_download.tmp")
     extract_folder = os.path.abspath("update_extracted")
@@ -205,7 +213,7 @@ def update_self():
 
     try:
         download_progress(LATEST_DOWNLOAD_URL, temp_download)
-        print("\033[33mExtracting archive...\033[0m")
+        print(f"{Color.YELLOW}Extracting archive...{Color.RESET}")
 
         if zipfile.is_zipfile(temp_download):
             with zipfile.ZipFile(temp_download, 'r') as zip_ref:
@@ -236,7 +244,7 @@ def update_self():
         else:
             shutil.copy(temp_download, temp_new_exe)
 
-        print("\033[32mUpdate downloaded successfully!\033[0m")
+        print(f"{Color.GREEN}Update downloaded successfully!{Color.RESET}")
         input("\nPress Enter to restart Preloader...")
 
         bat_content = f"""@echo off
@@ -260,13 +268,13 @@ del "%~f0"
         sys.exit()
 
     except urllib.error.HTTPError as e:
-        print(f"\033[31mFailed to update (Server Error): HTTP {e.code} - {e.reason}\033[0m")
+        print(f"{Color.RED}Failed to update (Server Error): HTTP {e.code} - {e.reason}{Color.RESET}")
     except urllib.error.URLError as e:
-        print(f"\033[31mFailed to update (Network Error): {e.reason}\033[0m")
+        print(f"{Color.RED}Failed to update (Network Error): {e.reason}{Color.RESET}")
     except zipfile.BadZipFile:
-        print("\033[31mFailed to update: Downloaded file is corrupted or not a valid ZIP archive.\033[0m")
+        print(f"{Color.RED}Failed to update: Downloaded file is corrupted or not a valid ZIP archive.{Color.RESET}")
     except Exception as e:
-        print(f"\033[31mFailed to update: {e}\033[0m")
+        print(f"{Color.RED}Failed to update: {e}{Color.RESET}")
     finally:
         if os.path.exists(temp_download):
             try: os.remove(temp_download)
@@ -281,15 +289,15 @@ del "%~f0"
 def settings_menu():
     while True:
         print_header()
-        print(f"\033[34mCurrent version: {CURRENT_VERSION}\033[0m")
+        print(f"{Color.DARK_BLUE}Current version: {CURRENT_VERSION}{Color.RESET}")
         print("")
-        print("\033[33m--- SETTINGS MENU ---\033[0m")
+        print(f"{Color.YELLOW}--- SETTINGS MENU ---{Color.RESET}")
         print("[1] Create a new profile")
         print("[2] Rename a profile")
         print("[3] Delete a profile")
         
         if NEW_VERSION_AVAILABLE:
-            print(f"\033[33m[4] Update program to {LATEST_VERSION_STR}\033[0m")
+            print(f"{Color.YELLOW}[4] Update program to {LATEST_VERSION_STR}{Color.RESET}")
 
         print("[6] Uninstall this program")
         print("[0] Back to main menu\n")
@@ -301,29 +309,29 @@ def settings_menu():
             profiles = get_profiles()
             
             if len(profiles) >= 9:
-                print("\033[31mCannot create new profile! Limit reached (maximum 9 profiles).\033[0m")
+                print(f"{Color.RED}Cannot create new profile! Limit reached (maximum 9 profiles).{Color.RESET}")
             else:
                 print("Enter new profile name (or '0' to cancel):")
                 name = input("> ").strip()
                 
                 if name == '0' or not name:
-                    print("\033[33mCreation cancelled.\033[0m")
+                    print(f"{Color.YELLOW}Creation cancelled.{Color.RESET}")
                 elif name.lower() == "backup":
-                    print("\033[31mName 'Backup' is reserved by the system!\033[0m")
+                    print(f"{Color.RED}Name 'Backup' is reserved by the system!{Color.RESET}")
                 else:
                     folder_name = f"Mods_{name}"
                     if not os.path.exists(folder_name):
                         os.makedirs(folder_name)
-                        print(f"\033[32mProfile '{name}' successfully created!\033[0m")
+                        print(f"{Color.GREEN}Profile '{name}' successfully created!{Color.RESET}")
                     else:
-                        print("\033[31mA profile with this name already exists!\033[0m")
-            
+                        print(f"{Color.RED}A profile with this name already exists!{Color.RESET}")
+
             input("\nPress Enter to continue...")
 
         elif key == '2':
             profiles = get_profiles()
             if not profiles:
-                print("\033[31m\nNo profiles available.\033[0m")
+                print(f"{Color.RED}\nNo profiles available.{Color.RESET}")
                 input("\nPress Enter to continue...")
                 continue
 
@@ -346,18 +354,18 @@ def settings_menu():
                     new_name = input("> ").strip()
                     
                     if new_name == '0' or not new_name:
-                        print("\033[33mRenaming cancelled.\033[0m")
+                        print(f"{Color.YELLOW}Renaming cancelled.{Color.RESET}")
                     elif new_name.lower() == "backup":
-                        print("\033[31mName 'Backup' is reserved by the system!\033[0m")
+                        print(f"{Color.RED}Name 'Backup' is reserved by the system!{Color.RESET}")
                     else:
                         os.rename(f"Mods_{old_name}", f"Mods_{new_name}")
-                        print("\033[32mProfile renamed successfully!\033[0m")
+                        print(f"{Color.GREEN}Profile renamed successfully!{Color.RESET}")
                     input("\nPress Enter to continue...")
 
         elif key == '3':
             profiles = get_profiles()
             if not profiles:
-                print("\033[31m\nNo profiles available.\033[0m")
+                print(f"{Color.RED}\nNo profiles available.{Color.RESET}")
                 input("\nPress Enter to continue...")
                 continue
 
@@ -375,16 +383,16 @@ def settings_menu():
                 if 0 <= choice < len(profiles):
                     target_name = profiles[choice]
                     print_header()
-                    print(f"\033[31mDelete profile '{target_name}'?\033[0m")
+                    print(f"{Color.RED}Delete profile '{target_name}'?{Color.RESET}")
                     print("[1] Yes")
                     print("[2] No")
                     
                     confirm = get_key()
                     if confirm == '1':
                         shutil.rmtree(f"Mods_{target_name}")
-                        print(f"\033[32m\nProfile '{target_name}' deleted.\033[0m")
+                        print(f"{Color.GREEN}\nProfile '{target_name}' deleted.{Color.RESET}")
                     else:
-                        print("\nDeletion cancelled.")
+                        print(f"{Color.YELLOW}\nDeletion cancelled.{Color.RESET}")
                     input("\nPress Enter to continue...")
 
         elif key == '4' and NEW_VERSION_AVAILABLE:
@@ -392,7 +400,7 @@ def settings_menu():
 
         elif key == '6':
             print_header()
-            print("\033[31mAre you sure you want to uninstall this program?\033[0m")
+            print(f"{Color.RED}Are you sure you want to uninstall this program?{Color.RESET}")
             print("[1] Yes")
             print("[2] No")
             
@@ -403,19 +411,19 @@ def settings_menu():
                 if os.path.exists("Mods_Backup"):
                     if not os.path.exists(MODS_FOLDER):
                         os.rename("Mods_Backup", MODS_FOLDER)
-                        print("\033[32mMods_Backup folder successfully restored to 'Mods'!\033[0m\n")
+                        print(f"{Color.GREEN}Mods_Backup folder successfully restored to 'Mods'!{Color.RESET}\n")
                     else:
-                        print("\033[33mFolder 'Mods' already exists, Mods_Backup left unchanged.\033[0m\n")
+                        print(f"{Color.YELLOW}Folder 'Mods' already exists, Mods_Backup left unchanged.{Color.RESET}\n")
 
                 if os.path.exists(STATE_FILE):
                     os.remove(STATE_FILE)
 
-                print("\033[32mPreloader program successfully uninstalled!\033[0m\n")
+                print(f"{Color.GREEN}Preloader program successfully uninstalled!{Color.RESET}\n")
                 
                 smapi_path = os.path.abspath(SMAPI_EXE)
-                print("\033[33mChange your Steam launch options back to:\033[0m")
-                print(f'\033[36m"{smapi_path}" %command%\033[0m\n')
-                
+                print(f"{Color.YELLOW}Change your Steam launch options back to:{Color.RESET}")
+                print(f'{Color.CYAN}"{smapi_path}" %command%{Color.RESET}\n')
+
                 input("Press Enter to close and remove the program...")
                 
                 exe_path = os.path.abspath(sys.argv[0])
@@ -451,9 +459,9 @@ def main():
         print_header()
         
         if NEW_VERSION_AVAILABLE:
-            print(f"\033[33m[!] New update available: {LATEST_VERSION_STR} (Current: {CURRENT_VERSION})\033[0m")
-            print(f"\033[33m    Go to the [0] Settings menu and press [4] Update\033[0m")
-            print(f"\033[33m    or download at: {GITHUB_RELEASE_URL}\033[0m\n")
+            print(f"{Color.YELLOW}[!] New update available: {LATEST_VERSION_STR} (Current: {CURRENT_VERSION}){Color.RESET}")
+            print(f"{Color.YELLOW}    Go to the [0] Settings menu and press [4] Update{Color.RESET}")
+            print(f"{Color.YELLOW}    or download at: {GITHUB_RELEASE_URL}{Color.RESET}\n")
 
         profiles = get_profiles()
 
@@ -463,7 +471,7 @@ def main():
                 print(f"[{idx}] {profile}")
             print()
         else:
-            print("\033[31mNo profiles found. Create a new one in settings.\033[0m\n")
+            print(f"{Color.RED}No profiles found. Create a new one in settings.{Color.RESET}\n")
 
         print("[0] Settings menu")
 
