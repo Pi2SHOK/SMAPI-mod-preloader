@@ -228,7 +228,7 @@ def update_self(latest_version_str, latest_download_url):
                 )
 
                 if not target_path.startswith(base_path + os.sep):
-                    raise ValueError("Unsafe path in ZIP archive")
+                    raise ValueError(f"{Color.RED}Unsafe path in ZIP archive{Color.RESET}")
 
             zip_ref.extractall(extract_folder)
             
@@ -242,16 +242,7 @@ def update_self(latest_version_str, latest_download_url):
                     break
             
             if not extracted_exe:
-                for root, dirs, files in os.walk(extract_folder):
-                    for file in files:
-                        if file.endswith(".exe"):
-                            extracted_exe = os.path.join(root, file)
-                            break
-                    if extracted_exe:
-                        break
-
-            if not extracted_exe:
-                raise Exception(f"Executable file '{TARGET_EXE_NAME}' not found inside downloaded ZIP archive!")
+                raise Exception(f"{Color.RED}Executable file '{TARGET_EXE_NAME}' not found inside downloaded ZIP archive!{Color.RESET}")
             
             shutil.copy(extracted_exe, temp_new_exe)
         
