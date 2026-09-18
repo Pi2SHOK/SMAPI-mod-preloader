@@ -26,6 +26,7 @@ yarn-error.log*
 Backups/
 dist/
 build/
+tests/
 *.exe
 *.dll
 *.so
@@ -42,7 +43,4 @@ Thumbs.db
 .env.local
 
 # Local Documentation
-Comands.md
-build/installer/EXE-00.toc
-Debug_
-tests/
+Commands.md
