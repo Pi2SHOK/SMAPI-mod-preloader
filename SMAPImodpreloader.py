@@ -495,6 +495,7 @@ def main():
         os.system("title SMAPI Mod Preloader")
 
     restore_active_profile()
+    check_for_updates()
 
     update_available, latest_version_str, latest_download_url = (
         check_for_updates()
