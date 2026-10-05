@@ -155,6 +155,15 @@ def fake_installer_error():
     render_progress_bar(percent, filled_length, bar_length, is_error=True)
 
 
+def download_steps(text):
+    time.sleep(0.17)
+    print(Color.CYAN + "=" * 55)
+    print(f"{Color.BOLD}{Color.YELLOW}{text}{Color.RESET}")
+    print()
+    print(Color.CYAN + "=" * 55 + Color.RESET)
+    
+
+
 def check_folder_step():
     global SHOULD_DELETE_FOLDER, TARGET_FOLDER_PATH
     try:
@@ -234,12 +243,7 @@ def main() -> None:
         input("Press Enter to exit...")
         sys.exit(1)
 
-    #[1/4]
-    time.sleep(0.17)
-    print(Color.CYAN + "=" * 55)
-    print(f"{Color.BOLD}{Color.YELLOW}[1/4] Searching for Stardew Valley folder...{Color.RESET}")
-    print()
-    print(Color.CYAN + "=" * 55 + Color.RESET)
+    download_steps("[1/4] Searching for Stardew Valley folder...")
 
     game_path = find_steam_game_path(GAME_FOLDER_NAME)
 
@@ -262,12 +266,7 @@ def main() -> None:
     print(f"{Color.GREEN}./ Folder found:{Color.RESET} {game_path}\n")
     time.sleep(0.17)
 
-    #[2/4]
-    time.sleep(0.17)
-    print(Color.CYAN + "=" * 55)
-    print(f"{Color.BOLD}{Color.YELLOW}[2/4] Installing {TARGET_FILE_NAME} to game folder...{Color.RESET}")
-    print()
-    print(Color.CYAN + "=" * 55 + Color.RESET)
+    download_steps(f"[2/4] Installing {TARGET_FILE_NAME} to game folder...")
 
     target_path = game_path / TARGET_FILE_NAME
     try:
@@ -289,22 +288,15 @@ def main() -> None:
         sys.exit(1)
 
     time.sleep(0.17)
-    #[3/4]
-    print(Color.CYAN + "=" * 55)
-    print(f"{Color.BOLD}{Color.YELLOW}[3/4] Removing temporary files after installation:{Color.RESET}")
-    print()
-    print(Color.CYAN + "=" * 55 + Color.RESET)
+
+    download_steps("[3/4] Removing temporary files after installation...")
 
     check_folder_step()
     fake_installer()
     time.sleep(0.17)
     print(f"{Color.GREEN}./ Temporary files removed{Color.RESET}\n")
-    time.sleep(0.17)
 
-    #[4/4]
-    print(Color.CYAN + "=" * 55)
-    print(f"{Color.BOLD}{Color.YELLOW}[4/4] Configure Launch Options in Steam:{Color.RESET}")
-    print(Color.CYAN + "=" * 55 + Color.RESET)
+    download_steps("[4/4] Configure Launch Options in Steam...")
     time.sleep(0.17)
 
     command_line = f'"{target_path}" %command%'
