@@ -1,3 +1,4 @@
+import msvcrt
 import os
 import shutil
 import subprocess
@@ -10,10 +11,9 @@ RESET = "\033[0m"
 BUILDER_DIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.abspath(os.path.join(BUILDER_DIR, ".."))
 
-RELEASE_NAME = "SMAPI-mod-preloader-main"
 
 ROOT_DIST_DIR = os.path.join(PARENT_DIR, "dist")
-RELEASE_DIR = os.path.join(ROOT_DIST_DIR, RELEASE_NAME)
+RELEASE_DIR = os.path.join(ROOT_DIST_DIR, "dist")
 
 
 def find_script_path(file_name):
@@ -28,9 +28,45 @@ def find_script_path(file_name):
     return None
 
 
+def get_key():
+    char = msvcrt.getch()
+    try:
+        return char.decode('utf-8')
+    except UnicodeDecodeError:
+        return ''
+
+
 ICON_PATH = find_script_path("icon.ico")
 
 
+def get_valid_choice(allowed_keys=("1", "2")):
+    while True:
+        key = get_key()
+
+        if not key:
+            continue
+
+        if key in allowed_keys:
+            return key
+
+        print(
+            f"Invalid input! Press {' or '.join(allowed_keys)}."
+        )
+
+
+def Folder_name():
+    print("press key to choose folder name")
+    print("")
+    print("[1] main")
+    print("[2] unstable")
+
+    key = get_valid_choice(allowed_keys=("1", "2"))
+    if key == "1":
+        return "main"
+    elif key == "2":
+        return "unstable"
+
+    
 def run_pyinstaller(script_name):
     script_path = find_script_path(script_name)
 
@@ -55,8 +91,10 @@ def run_pyinstaller(script_name):
     subprocess.run(cmd, check=True)
 
 
-def build():
+def build(release_name):
     os.system("")
+
+    release_dir = os.path.join(ROOT_DIST_DIR, release_name)
 
     print("\n[1/2] Building installer.py...")
     run_pyinstaller("installer.py")
@@ -64,10 +102,10 @@ def build():
     print("\n[2/2] Building SMAPImodpreloader.py...")
     run_pyinstaller("SMAPImodpreloader.py")
 
-    if os.path.exists(RELEASE_DIR):
-        shutil.rmtree(RELEASE_DIR)
+    if os.path.exists(release_dir):
+        shutil.rmtree(release_dir)
 
-    os.makedirs(RELEASE_DIR, exist_ok=True)
+    os.makedirs(release_dir, exist_ok=True)
 
     readme_path = find_script_path("README.md")
     license_path = find_script_path("LICENSE")
@@ -82,15 +120,15 @@ def build():
     for file in files_to_copy:
         if file and os.path.exists(file):
             try:
-                shutil.copy(file, RELEASE_DIR)
+                shutil.copy(file, release_dir)
                 print(f"Copied: {os.path.basename(file)}")
             except Exception as e:
                 print(f"[!] Failed to copy {os.path.basename(file)}: {e}")
         else:
             print("[!] File not found (skipped)")
 
-    zip_path = os.path.join(ROOT_DIST_DIR, RELEASE_NAME)
-    shutil.make_archive(zip_path, "zip", RELEASE_DIR)
+    zip_path = os.path.join(ROOT_DIST_DIR, release_name)
+    shutil.make_archive(zip_path, "zip", release_dir)
 
     build_temp_dir = os.path.join(BUILDER_DIR, "build")
     if os.path.exists(build_temp_dir):
@@ -120,4 +158,8 @@ def build():
 
 
 if __name__ == "__main__":
-    build()
+    folder_name = Folder_name()
+
+    release_name = f"SMAPI-mod-preloader-{folder_name}"
+
+    build(release_name)
