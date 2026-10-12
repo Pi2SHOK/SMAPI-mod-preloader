@@ -21,6 +21,7 @@ yarn-error.log*
 *.user
 *.userosscache
 *.sln.docstates
+*.code-workspace
 
 # Binary Files and Build Outputs
 Backups/
